@@ -6,98 +6,98 @@
 /*   By: akelli <akelli@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/04 19:11:09 by akelli            #+#    #+#             */
-/*   Updated: 2020/11/04 19:12:24 by akelli           ###   ########.fr       */
+/*   Updated: 2020/11/06 21:20:22 by akelli           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/ft_printf.h"
 
-int						fill_width(t_print *p, char *s)
+int						fill_width(t_flag *flag, char *str)
 {
 	int					i;
 
 	i = 0;
-	if (p->just >= 0)
+	if (flag->minus >= 0)
 	{
-		if (p->sp)
-			s[i++] = ' ';
-		while (i < p->width)
-			s[i++] = (p->deli) ? '0' : ' ';
+		if (flag->space)
+			str[i++] = ' ';
+		while (i < flag->width)
+			str[i++] = (flag->zero) ? '0' : ' ';
 		i--;
 	}
 	else
 	{
-		if (p->sign)
-			s[i++] = (p->sign > 0) ? '+' : '-';
-		else if (p->sp)
-			s[i++] = ' ';
+		if (flag->plus)
+			str[i++] = (flag->plus > 0) ? '+' : '-';
+		else if (flag->space)
+			str[i++] = ' ';
 	}
 	return (i);
 }
 
-static int				mk(t_print *p, char *s, int b, unsigned long long n)
+static int				mk(t_flag *f, char *s, int b, unsigned long long n)
 {
 	int					j;
 	int					i;
 
-	i = fill_width(p, s);
-	j = p->prec;
+	i = fill_width(f, s);
+	j = f->prec;
 	while (j > 0)
 	{
 		s[i] = '0';
-		if (((b == 16 && p->hash && n != 0) || (b == 16 && p->hash && p->pnt))
-		&& ((p->just < 0 && j == p->prec - 1) || (p->just >= 0 && j == 2)))
-			s[i] = 'x' - p->cap;
-		i = (p->just >= 0) ? i - 1 : i + 1;
+		if (((b == 16 && f->hash && n != 0) || (b == 16 && f->hash && f->pnt))
+		&& ((f->minus < 0 && j == f->prec - 1) || (f->minus >= 0 && j == 2)))
+			s[i] = 'x' - f->cap;
+		i = (f->minus >= 0) ? i - 1 : i + 1;
 		j--;
 	}
-	i = (p->just >= 0) ? i + p->prec : i - 1;
+	i = (f->minus >= 0) ? i + f->prec : i - 1;
 	while (n)
 	{
 		s[i--] = ((n % (unsigned long)b) < 10) ?
 		n % (unsigned long)b + '0'
-		: n % (unsigned long)b + 'a' - 10 - p->cap;
+		: n % (unsigned long)b + 'a' - 10 - f->cap;
 		n /= (unsigned long)b;
 	}
 	if (i >= 0)
-		s[i] = (b == 8 && p->hash) ? '0' : s[i];
+		s[i] = (b == 8 && f->hash) ? '0' : s[i];
 	return (i);
 }
 
-static void				set_p(t_print *p, int *i, unsigned long long nb, int b)
+static void				set_p(t_flag *f, int *i, unsigned long long nb, int b)
 {
-	if (p->deli && p->dot && p->prec >= 0)
-		p->deli = 0;
-	if (p->prec < 0)
-		p->prec = 0;
-	*i = (p->prec > *i) ? p->prec : *i;
-	p->prec = (p->prec <= *i) ? *i : p->prec;
-	*i = (b == 16 && p->hash && (nb != 0 || p->pnt)) ? *i + 2 : *i;
-	p->prec = (b == 16 && p->hash && (nb != 0 || p->pnt)) ?
-	p->prec + 2 : p->prec;
-	*i = (p->width > *i) ? p->width : *i;
-	p->width = *i;
+	if (f->zero && f->dot && f->prec >= 0)
+		f->zero = 0;
+	if (f->prec < 0)
+		f->prec = 0;
+	*i = (f->prec > *i) ? f->prec : *i;
+	f->prec = (f->prec <= *i) ? *i : f->prec;
+	*i = (b == 16 && f->hash && (nb != 0 || f->pnt)) ? *i + 2 : *i;
+	f->prec = (b == 16 && f->hash && (nb != 0 || f->pnt)) ?
+			f->prec + 2 : f->prec;
+	*i = (f->width > *i) ? f->width : *i;
+	f->width = *i;
 }
 
-void					ft_itoa_b(t_print *p, unsigned long long nb, int b)
+void					ft_itoa_base(t_flag *f, unsigned long long nb, int b)
 {
 	int					i;
-	int					l;
+	int					len;
 	unsigned long long	n;
 	char				*s;
 
-	l = (p->dot && p->prec == 0 && nb == 0) ? 0 : 1;
+	len = (f->dot && f->prec == 0 && nb == 0) ? 0 : 1;
 	n = nb;
 	while ((n /= b) >= 1)
-		l++;
-	i = (b == 8 && p->hash && (nb != 0 || p->dot)) ? l + 1 : l;
-	set_p(p, &i, nb, b);
+		len++;
+	i = (b == 8 && f->hash && (nb != 0 || f->dot)) ? len + 1 : len;
+	set_p(f, &i, nb, b);
 	s = (char *)malloc(i * sizeof(char) + 1);
 	ft_memset((void *)s, ' ', i);
 	s[i] = '\0';
-	i = mk(p, s, b, nb);
-	est_sign(p, s, i, l);
-	s[1] = (p->deli && b == 16 && p->hash && nb != 0) ? ('x' - p->cap) : s[1];
-	buffer(p, s, p->width);
+	i = mk(f, s, b, nb);
+	flag_con(f, s, i, len);
+	s[1] = (f->zero && b == 16 && f->hash && nb != 0) ? ('x' - f->cap) : s[1];
+	buffer(f, s, f->width);
 	free(s);
 }

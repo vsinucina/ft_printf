@@ -5,20 +5,19 @@ NAME = libftprintf.a
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 
-SRC_NAME  = double_calculation.c	\
-	transform_char.c				\
-	buffer_increase.c				\
-	ft_itoa_base.c					\
-	ft_itoa.c						\
-	ft_ldtoa.c						\
-	parse_start.c					\
-	ft_printf.c						\
-	ft_utoa.c						\
-	validation.c					\
-	transform_number.c				\
-	transform_pointer.c				\
-	init_structure.c                \
-	parse_continue.c
+SRC_NAME  = calc_double.c	\
+	ch_transform.c			\
+	ft_buffer.c				\
+	ft_itoa_base.c			\
+	ft_itoa_pf.c			\
+	ft_ldtoa_pf.c			\
+	ft_parse.c				\
+	ft_printf.c				\
+	ft_utoa_pf.c			\
+	is_valid.c				\
+	num_transform.c			\
+	p_transform.c			\
+	parse.c
 
 LIBFT_SRC_NAME = ft_atoi.c	\
 	ft_bzero.c				\
@@ -81,8 +80,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDES)
 	$(CC) $(FLAGS) -I $(INCLUDES_DIR) -o $@ -c $<
 
 clean:
-#	/bin/rm -f $(OBJS)
-	@rm -f $(OBJS)
+	/bin/rm -f $(OBJS)
+#	@rm -f $(OBJS)
 	@rm -rf $(OBJ_DIR)
 	@make clean -C $(LIBFT_DIR)
 	@echo "$(RED)✗ Deletion of object files$(EOC)"
